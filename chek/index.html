@@ -80,6 +80,7 @@ function fail(msg){paper.innerHTML='';const e=el('div','err');e.append(el('b',''
   if(+d.d)paper.append(row('Chegirma','−'+som(d.d)));
   paper.append(row('Jami',som(d.T),'tt'));
   paper.append(row("To'lov turi",d.m||''));
+  if(Array.isArray(d.x))d.x.forEach(p=>paper.append(row('— '+p[0],som(p[1]))));
   if(d.m==='Naqd'&&d.r!=null){paper.append(row('Olindi',som(d.r)));paper.append(row('Qaytim',som(d.k)))}
   if(d.m==='Qarz'&&d.u){paper.append(row("To'lash muddati",String(d.u).split('-').reverse().join('.')))}
   const ok=el('div','ok',d.m==='Qarz'?'QARZGA BERILDI':"TO'LANDI");if(d.m==='Qarz'){ok.style.color='#d9541f';ok.style.borderColor='#d9541f'}paper.append(ok);
