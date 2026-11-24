@@ -81,7 +81,8 @@ function fail(msg){paper.innerHTML='';const e=el('div','err');e.append(el('b',''
   paper.append(row('Jami',som(d.T),'tt'));
   paper.append(row("To'lov turi",d.m||''));
   if(d.m==='Naqd'&&d.r!=null){paper.append(row('Olindi',som(d.r)));paper.append(row('Qaytim',som(d.k)))}
-  paper.append(el('div','ok',"TO'LANDI"));
+  if(d.m==='Qarz'&&d.u){paper.append(row("To'lash muddati",String(d.u).split('-').reverse().join('.')))}
+  const ok=el('div','ok',d.m==='Qarz'?'QARZGA BERILDI':"TO'LANDI");if(d.m==='Qarz'){ok.style.color='#d9541f';ok.style.borderColor='#d9541f'}paper.append(ok);
   if(d.f)paper.append(el('div','ft',d.f));
   document.getElementById('sub').textContent=(d.s||'Do\'kon')+' · '+som(d.T);
   document.title=`Chek #${d.n||''} — ${d.s||'ezome'}`;
