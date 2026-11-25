@@ -1,0 +1,44 @@
+{
+  "name": "ezome — do'kon tizimi",
+  "short_name": "ezome",
+  "description": "Kiyim do'koni uchun katalog, kassa, shtrix-kod, qarzlar va hisobotlar",
+  "lang": "uz",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f3ef",
+  "theme_color": "#1f6bff",
+  "categories": [
+    "business",
+    "shopping",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

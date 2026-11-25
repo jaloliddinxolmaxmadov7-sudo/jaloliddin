@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Elektron chek — ezome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--blue:#1f6bff;--ink:#111318;--mute:#6b7078;--line:#e7e8e3;--bg:#eef1f6}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:16px/1.5 Onest,system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-direction:column;align-items:center}
+.top{width:100%;background:var(--blue);color:#fff;padding:22px 16px 70px;text-align:center}
+.brand{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.brand i{width:28px;height:28px;border-radius:9px;background:#fff;color:var(--blue);display:grid;place-items:center;font-style:normal;font-size:17px}
+.top h1{font-size:28px;line-height:1.1;margin:14px 0 4px;letter-spacing:-.02em}
+.top p{margin:0;opacity:.85;font-size:15px}
+.paper{position:relative;width:min(420px,calc(100% - 28px));margin-top:-48px;background:#fff;border-radius:18px 18px 0 0;padding:24px 22px 26px;box-shadow:0 20px 40px -20px rgba(16,24,40,.35)}
+.paper::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:10px;background:linear-gradient(135deg,#fff 5px,transparent 0) 0 0/12px 10px repeat-x,linear-gradient(225deg,#fff 5px,transparent 0) 0 0/12px 10px repeat-x}
+.hd{text-align:center;border-bottom:1px dashed #c9ccd3;padding-bottom:14px;margin-bottom:12px}
+.hd b{display:block;font-size:24px;letter-spacing:-.02em}
+.hd div{color:var(--mute);font-size:14px}
+.rl{display:flex;justify-content:space-between;gap:12px;font-size:15px;padding:5px 0}
+.rl span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.rl small{display:block;color:var(--mute);font-size:13px}
+.tt{border-top:1px dashed #c9ccd3;margin-top:10px;padding-top:12px;font-size:21px;font-weight:800}
+.tt span:last-child{color:var(--blue)}
+.ok{margin:18px auto 0;width:max-content;color:#0f7d54;font-weight:800;border:2px solid #0f7d54;border-radius:10px;padding:3px 14px;transform:rotate(-5deg);letter-spacing:.05em}
+.ft{text-align:center;color:var(--mute);font-size:14px;margin-top:14px}
+.acts{display:flex;gap:10px;margin:30px 0 12px;flex-wrap:wrap;justify-content:center}
+.btn{border:0;border-radius:14px;min-height:48px;padding:0 20px;font:600 16px Onest,system-ui,sans-serif;background:var(--blue);color:#fff;cursor:pointer}
+.btn.g{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.note{color:var(--mute);font-size:13px;text-align:center;max-width:360px;padding:0 16px 30px}
+.err{padding:30px 10px;text-align:center}
+.err b{display:block;font-size:20px;margin-bottom:6px}
+@media print{body{background:#fff}.top,.acts,.note{display:none}.paper{margin:0;box-shadow:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand"><i>e</i>ezome</span>
+  <h1>Elektron chek</h1>
+  <p id="sub">Xaridingiz tafsilotlari</p>
+</header>
+<main class="paper" id="paper"><div class="err">Yuklanmoqda…</div></main>
+<div class="acts" id="acts" hidden>
+  <button class="btn" id="save">Saqlash / chop etish</button>
+  <button class="btn g" id="share">Ulashish</button>
+</div>
+<p class="note">Bu chek ezome kassa tizimida yaratilgan. Savol bo'lsa, chekdagi do'kon telefoniga murojaat qiling.</p>
+<script>
+{
+const paper=document.getElementById('paper');
+const fmt=n=>String(Math.round(+n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+const som=n=>fmt(n)+" so'm";
+const pad=n=>String(n).padStart(2,'0');
+const dt=t=>{const d=new Date(+t);return isNaN(d)?'':pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())};
+const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=String(text);return e};
+const row=(a,b,cls)=>{const r=el('div','rl'+(cls?' '+cls:''));r.append(el('span','',a),el('span','',b));return r};
+function bytes(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const bin=atob(s);return Uint8Array.from(bin,c=>c.charCodeAt(0))}
+async function decode(h){
+  const kind=h[0];let b=bytes(h.slice(1));
+  if(kind==='z'){if(!('DecompressionStream' in window))throw new Error('old');b=new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())}
+  else if(kind!=='j')throw new Error('bad');
+  return JSON.parse(new TextDecoder().decode(b));
+}
+function fail(msg){paper.innerHTML='';const e=el('div','err');e.append(el('b','','Chek ochilmadi'),el('span','',msg));paper.append(e)}
+(async()=>{
+  const h=location.hash.slice(1);
+  if(!h){fail("Chekdagi QR kodni telefon kamerasi bilan skanerlang.");return}
+  let d;try{d=await decode(h)}catch(e){fail(e.message==='old'?"Telefon brauzeringiz eski. Chrome yoki Safari'ni yangilab, qayta skanerlang.":"QR kod buzilgan yoki to'liq o'qilmadi.");return}
+  paper.innerHTML='';
+  const hd=el('div','hd');hd.append(el('b','',d.s||'Do\'kon'));
+  if(d.a)hd.append(el('div','',d.a));if(d.p)hd.append(el('div','',d.p));
+  hd.append(el('div','',`Sotuv #${d.n||''} · ${dt(d.t)}`));if(d.c)hd.append(el('div','',`Kassir: ${d.c}`));
+  paper.append(hd);
+  (Array.isArray(d.i)?d.i:[]).forEach(it=>{const [name,q,p]=it;const r=el('div','rl');const l=el('span','',name);l.append(el('small','',`${fmt(q)} × ${som(p)}`));r.append(l,el('span','',som((+q||0)*(+p||0))));paper.append(r)});
+  if(+d.d)paper.append(row('Chegirma','−'+som(d.d)));
+  paper.append(row('Jami',som(d.T),'tt'));
+  paper.append(row("To'lov turi",d.m||''));
+  if(Array.isArray(d.x))d.x.forEach(p=>paper.append(row('— '+p[0],som(p[1]))));
+  if(d.m==='Naqd'&&d.r!=null){paper.append(row('Olindi',som(d.r)));paper.append(row('Qaytim',som(d.k)))}
+  if(d.m==='Qarz'&&d.u){paper.append(row("To'lash muddati",String(d.u).split('-').reverse().join('.')))}
+  const ok=el('div','ok',d.m==='Qarz'?'QARZGA BERILDI':"TO'LANDI");if(d.m==='Qarz'){ok.style.color='#d9541f';ok.style.borderColor='#d9541f'}paper.append(ok);
+  if(d.f)paper.append(el('div','ft',d.f));
+  document.getElementById('sub').textContent=(d.s||'Do\'kon')+' · '+som(d.T);
+  document.title=`Chek #${d.n||''} — ${d.s||'ezome'}`;
+  document.getElementById('acts').hidden=false;
+})();
+document.getElementById('save').onclick=()=>window.print();
+document.getElementById('share').onclick=async()=>{try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);alert('Havola nusxalandi')}}catch(e){}};
+}
+</script>
+</body>
+</html>
